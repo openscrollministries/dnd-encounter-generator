@@ -17,6 +17,7 @@ button{background:#7a1f1f;color:#fbe7b5;border:1px solid #3b0d0d;border-radius:6
 footer a{color:#d9c08a}footer{color:#a89060;text-align:center;font-size:.75em;padding:12px}
 @media print{body{background:#fff}.noprint,.form,header p{display:none}header h1{color:#000;text-shadow:none}.card,.sb{box-shadow:none;break-inside:avoid}}
 .mi{padding-left:18px}.mi li{margin:6px 0}.rar{font-size:.75em;padding:1px 6px;border-radius:4px;color:#fff;background:#3d7a3d}.rar.Common{background:#777}.rar.Rare{background:#2a5fa8}.rar.VeryRare{background:#7a2aa8}.rar.Legendary{background:#c27a14}
+button.sm{padding:2px 7px;font-size:.8em}.lvup{background:#c27a14;color:#fff;padding:1px 6px;border-radius:4px;font-weight:bold}.xpt{width:100%;border-collapse:collapse;margin-top:8px;font-size:.9em}.xpt td,.xpt th{border-bottom:1px solid #c9a86a;padding:4px;text-align:left}#xplist{padding-left:18px}
 </style></head><body><header><h1>🐉 Quick Encounter Generator</h1><p>Monsters, traps &amp; NPCs for D&amp;D 5e — ready in one click</p></header>
 <div class="wrap"><div class="form noprint">
 <div class="ask"><input id="ask" placeholder='Try: "4 monsters for 5 third level characters in a swamp"' onkeydown="if(event.key=='Enter')ask()"><button onclick="ask()">Ask</button></div>
@@ -28,6 +29,14 @@ footer a{color:#d9c08a}footer{color:#a89060;text-align:center;font-size:.75em;pa
 <div><label>Difficulty</label><select id="diff"><option>easy</option><option selected>medium</option><option>hard</option><option>deadly</option></select></div>
 <div class="btns"><button onclick="gen()">🎲 Generate / Reroll</button><button onclick="print()">🖨️ Print</button><button onclick="copyOut()">📋 Copy</button><label style="align-self:center"><input type="checkbox" id="tre" checked style="width:auto" onchange="render()"> Treasure</label><select id="tmode" style="width:auto" onchange="rerollEncT()"><option value="ind">Individual</option><option value="hoard">Hoard</option></select></div>
 </div><div id="out"></div>
+<div class="card" id="lksec"><h2>🔎 Monster Lookup</h2><input id="lk" list="lkl" placeholder="Type a monster name, e.g. Owlbear" oninput="lookup()"><datalist id="lkl"></datalist><div id="lkout"></div></div>
+<div class="card" id="xpsec"><h2>🏆 XP Tracker</h2>
+<div class="form" style="box-shadow:none;margin:0;padding:8px"><div><label>Party members</label><input id="xpm" type="number" min="1" onchange="XP.members=Math.max(1,+this.value);saveXP()"></div>
+<div class="ask"><input id="xpadd" list="lkl" placeholder="Add a monster by name, or a raw XP number" onkeydown="if(event.key=='Enter')addManual()"><button onclick="addManual()">Add</button></div></div>
+<ul id="xplist"></ul><p id="xptot" style="font-size:1.15em"></p>
+<div class="btns"><button onclick="XP.entries.pop();saveXP()">↩ Undo last</button><button onclick="if(confirm('Reset all XP?')){XP={members:null,entries:[],chars:XP.chars};saveXP()}">🔄 Reset XP</button></div>
+<h3>Characters (optional)</h3><div class="ask"><input id="xpcn" placeholder="Character name"><input id="xpcs" type="number" placeholder="Current XP" style="max-width:130px"><button onclick="addChar()">Add</button></div>
+<table class="xpt"><thead><tr><th>Name</th><th>Start</th><th>Now</th><th>Level</th><th>Next</th><th></th></tr></thead><tbody id="xpchars"></tbody></table></div>
 <div class="card" id="tsec"><h2>💰 Roll Treasure</h2><div class="form noprint" style="box-shadow:none;margin:0;padding:8px">
 <div><label>Type</label><select id="tkind" onchange="rollT()"><option value="ind">Individual</option><option value="hoard" selected>Hoard</option></select></div>
 <div><label>CR / level band</label><select id="tband" onchange="rollT()"><option value="0">CR 0–4 (levels 1–4)</option><option value="1">CR 5–10 (levels 5–10)</option><option value="2">CR 11–16 (levels 11–16)</option><option value="3">CR 17+ (levels 17–20)</option></select></div>
@@ -136,7 +145,7 @@ function treasure(lvl){const t=lvl<=4?0:lvl<=10?1:lvl<=16?2:3,c=[[ '5d6 sp','4d6
  return `${rnd(c)}, plus ${rnd(it)}.`;}
 function block(m,i){const ab=['STR','DEX','CON','INT','WIS','CHA'].map((k,j)=>`<div><b>${k}</b><br>${m.ab[j]} (${sg(md(m.ab[j]))})</div>`).join('');
  const L=(h,a)=>a&&a.length?`<h4>${h}</h4>`+a.map(x=>`<p><b><i>${esc(x[0])}.</i></b> ${esc(x[1])}</p>`).join(''):'';
- return `<div class="sb"><div class="sbh"><h3>${esc(m.n)}</h3><button class="noprint" onclick="rerollOne(${i})">🎲 Reroll this monster</button></div><i>${m.sz} ${m.t}${m.st?' ('+m.st+')':''}, ${m.al}</i><hr>
+ return `<div class="sb"><div class="sbh"><h3>${esc(m.n)}</h3>${i>=0?`<span class="noprint"><button onclick="defeat(${i})">🏆 Defeated</button> <button onclick="rerollOne(${i})">🎲 Reroll this monster</button></span>`:''}</div><i>${m.sz} ${m.t}${m.st?' ('+m.st+')':''}, ${m.al}</i><hr>
  <b>Armor Class</b> ${m.ac}${m.act?' ('+m.act+')':''}<br><b>Hit Points</b> ${m.hp} (${m.hd})<br><b>Speed</b> ${m.sp}<hr><div class="ab">${ab}</div><hr>
  ${m.sv?'<b>Saving Throws</b> '+m.sv+'<br>':''}${m.sk?'<b>Skills</b> '+m.sk+'<br>':''}${m.res.map(r=>'<b>'+r[0]+'</b> '+r[1]+'<br>').join('')}<b>Senses</b> ${m.se}<br><b>Languages</b> ${esc(m.la)}<br><b>Challenge</b> ${fmt(m.cr)} (${m.xp.toLocaleString()} XP)<hr>
  ${L('Traits',m.tr)}${L('Actions',m.a)}${L('Reactions',m.ra)}${L('Legendary Actions',m.la2)}</div>`;}
@@ -161,6 +170,30 @@ function render(){const c=cur,t=c.thresholds;
  ${$('tre').checked?'<div class="card"><div class="sbh"><h3>💰 '+c.tre.kind+'</h3><button class="noprint" onclick="rerollEncT()">🎲 Reroll loot</button></div>'+treasureHTML(c.tre.o)+'</div>':''}`;}
 function ask(){const p=parse($('ask').value);if(p.pcs)$('pcs').value=Math.min(10,p.pcs);if(p.lvl)$('lvl').value=Math.min(20,p.lvl);if(p.count)$('cnt').value=Math.min(12,p.count);if(p.env)$('env').value=p.env;if(p.type)$('type').value=p.type;if(p.diff)$('diff').value=p.diff;gen();}
 function copyOut(){navigator.clipboard.writeText($('out').innerText).then(()=>alert('Copied!'));}
-window.onload=()=>{gen();rollT();};
+window.onload=()=>{gen();rollT();renderXP();$('lkl').innerHTML=MON.map(m=>'<option value="'+m.n+'">').join('');};
+
+const LVXP=[0,300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000,140000,165000,195000,225000,265000,305000,355000];
+const lvlOf=x=>{let l=1;LVXP.forEach((t,i)=>{if(x>=t)l=i+1});return l;};
+let XP=JSON.parse(localStorage.getItem('xpTracker')||'null')||{members:null,entries:[],chars:[]};
+const saveXP=()=>{localStorage.setItem('xpTracker',JSON.stringify(XP));renderXP();};
+function addXP(name,xp){XP.entries.push({id:Date.now()+Math.random(),name,xp:+xp||0});saveXP();}
+function defeat(i){const m=cur.monsters[i];addXP(m.n,m.xp);}
+function xpTotal(){return XP.entries.reduce((s,e)=>s+e.xp,0);}
+function members(){return XP.members||+$('pcs').value;}
+function renderXP(){const t=xpTotal(),n=members(),per=Math.floor(t/n);
+ $('xpm').value=n;
+ $('xplist').innerHTML=XP.entries.length?XP.entries.map((e,i)=>`<li>${esc(e.name)} — ${e.xp.toLocaleString()} XP <button class="sm" onclick="XP.entries.splice(${i},1);saveXP()">✖</button></li>`).join(''):'<li><i>No defeated monsters yet.</i></li>';
+ $('xptot').innerHTML=`Total: <b>${t.toLocaleString()} XP</b> · Each of ${n} members: <b>${per.toLocaleString()} XP</b>`;
+ $('xpchars').innerHTML=XP.chars.map((c,i)=>{const now=c.start+per,l0=lvlOf(c.start),l1=lvlOf(now),nx=LVXP[l1];
+  return `<tr><td>${esc(c.name)}</td><td>${c.start.toLocaleString()}</td><td><b>${now.toLocaleString()}</b></td><td>${l1}${l1>l0?' <span class="lvup">⬆ LEVEL UP!</span>':''}</td><td>${nx?(nx-now).toLocaleString()+' to '+(l1+1):'max'}</td><td><button class="sm" onclick="XP.chars.splice(${i},1);saveXP()">✖</button></td></tr>`}).join('');}
+function addChar(){const n=$('xpcn').value.trim()||'Hero '+(XP.chars.length+1);XP.chars.push({name:n,start:+$('xpcs').value||0});$('xpcn').value='';$('xpcs').value='';saveXP();}
+function addManual(){const v=$('xpadd').value.trim();if(!v)return;const m=MON.find(x=>x.n.toLowerCase()==v.toLowerCase());
+ if(m)addXP(m.n,m.xp);else if(/^\d+$/.test(v))addXP('Manual XP',+v);else{alert('No SRD monster named "'+v+'". Enter an exact name from the list or a number.');return;}$('xpadd').value='';}
+function lookup(){const v=$('lk').value.trim().toLowerCase();if(!v){$('lkout').innerHTML='';return;}
+ const m=MON.find(x=>x.n.toLowerCase()==v)||MON.find(x=>x.n.toLowerCase().startsWith(v))||MON.find(x=>x.n.toLowerCase().includes(v));
+ if(!m){$('lkout').innerHTML='<p class="warn">No match. Only monsters from the free SRD 5.1 are included (334 of them). Others, like the Beholder or Mind Flayer, are in paid books.</p>';return;}
+ LK=m;$('lkout').innerHTML=`<div class="btns" style="margin:8px 0"><button onclick="addToEnc()">➕ Add to encounter</button><button onclick="addXP(LK.n,LK.xp)">🏆 Add to XP tracker</button></div>`+block(m,-1);}
+let LK=null;
+function addToEnc(){cur.monsters.push(LK);cur.mult=multiplier(cur.monsters.length,opt.pcs);const f=finish(cur.monsters,opt,[],cur.mult);Object.assign(cur,{raw:f.raw,adj:f.adj,rating:f.rating});render();$('out').scrollIntoView({behavior:'smooth'});}
 
 </script></body></html>
