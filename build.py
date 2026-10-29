@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-JS_FILES = ("logic.js", "treasure.js", "ui.js", "xp.js", "custom.js")
+JS_FILES = ("logic.js", "treasure.js", "ui.js", "xp.js", "custom.js", "items.js", "print.js")
 
 
 def embed(obj):

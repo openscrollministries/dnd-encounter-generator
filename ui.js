@@ -21,9 +21,11 @@ function block(m,i,cnt){const ab=['STR','DEX','CON','INT','WIS','CHA'].map((k,j)
  ${m.sv?'<b>Saving Throws</b> '+esc(m.sv)+'<br>':''}${m.sk?'<b>Skills</b> '+esc(m.sk)+'<br>':''}${(m.res||[]).map(r=>'<b>'+esc(r[0])+'</b> '+esc(r[1])+'<br>').join('')}<b>Senses</b> ${esc(m.se||'—')}<br><b>Languages</b> ${esc(m.la||'—')}<br><b>Challenge</b> ${fmt(m.cr)} (${(m.xp||0).toLocaleString()} XP)<hr>
  ${L('Traits',m.tr)}${L('Actions',m.a)}${L('Reactions',m.ra)}${L('Legendary Actions',m.la2)}</div>`;}
 let cur=null,opt=null;
-function encTreasure(){const hd=$('tmode').value=='hoard';if(hd){const mx=Math.max(...cur.monsters.map(m=>m.cr));return {kind:'Treasure Hoard ('+BANDS[band(mx)]+')',o:hoard(band(mx))};}
- const o={coins:{},gems:[],art:[],magic:[]};cur.monsters.forEach(m=>mergeT(o,individual(band(m.cr))));return {kind:'Individual treasure (one roll per monster)',o};}
-function rollT(){const b=+$('tband').value,k=$('tkind').value;$('tout').innerHTML=`<h3>💰 ${k=='hoard'?'Treasure Hoard':'Individual Treasure'} — ${BANDS[b]}</h3>`+treasureHTML(k=='hoard'?hoard(b):individual(b));}
+function encTreasure(){const hd=$('tmode').value=='hoard';const mx=Math.max(...cur.monsters.map(m=>m.cr));
+ if(hd){const result={kind:'Treasure Hoard ('+BANDS[band(mx)]+')',o:hoard(band(mx)),band:band(mx)};if(typeof attachEncounterItem==='function')attachEncounterItem(result);return result;}
+ const o={coins:{},gems:[],art:[],magic:[]};cur.monsters.forEach(m=>mergeT(o,individual(band(m.cr))));
+ const result={kind:'Individual treasure (one roll per monster)',o,band:band(mx)};if(typeof attachEncounterItem==='function')attachEncounterItem(result);return result;}
+function rollT(){const b=+$('tband').value,k=$('tkind').value;let html=`<h3>💰 ${k=='hoard'?'Treasure Hoard':'Individual Treasure'} — ${BANDS[b]}</h3>`+treasureHTML(k=='hoard'?hoard(b):individual(b));if(typeof treasureExtra==='function')html+=treasureExtra(b);$('tout').innerHTML=html;}
 function copyT(){navigator.clipboard.writeText($('tout').innerText).then(()=>alert('Copied!'));}
 function rerollEncT(){cur.tre=encTreasure();render();}
 function readOpt(){return {pcs:+$('pcs').value,lvl:+$('lvl').value,count:$('cnt').value=='auto'?'auto':+$('cnt').value,env:$('env').value,type:$('type').value,diff:$('diff').value};}
@@ -39,10 +41,10 @@ function render(){const c=cur,t=c.thresholds;const tgt=c.built?'bout':'out';$(c.
  ${c.warns.map(w=>'<p class="warn">⚠️ '+w+'</p>').join('')}<p class="hook">📜 <i>${c.hook}</i></p></div>
  ${blocks}
  <div class="card"><h3>🪤 Trap</h3><p>${c.trap}</p></div><div class="card"><h3>🧑 NPCs</h3>${c.npcs}</div>
- ${$('tre').checked?'<div class="card"><div class="sbh"><h3>💰 '+c.tre.kind+'</h3><button class="noprint" onclick="rerollEncT()">🎲 Reroll loot</button></div>'+treasureHTML(c.tre.o)+'</div>':''}`;}
+ ${$('tre').checked?'<div class="card"><div class="sbh"><h3>💰 '+c.tre.kind+'</h3><button class="noprint" onclick="rerollEncT()">🎲 Reroll loot</button></div>'+treasureHTML(c.tre.o)+(c.tre.home&&typeof itemActions==='function'?itemActions(c.tre.home,'enc'):'')+'</div>':''}`;}
 function ask(){const p=parse($('ask').value);if(p.pcs)$('pcs').value=Math.min(10,p.pcs);if(p.lvl)$('lvl').value=Math.min(20,p.lvl);if(p.count)$('cnt').value=Math.min(12,p.count);if(p.env)$('env').value=p.env;if(p.type)$('type').value=p.type;if(p.diff)$('diff').value=p.diff;gen();}
 function copyOut(){navigator.clipboard.writeText($('out').innerText).then(()=>alert('Copied!'));}
-window.onload=()=>{if(typeof initCustom==='function')initCustom();addRow('Goblin',3);addRow('Bugbear',1);gen();rollT();renderXP();if(typeof refreshMonsterList==='function')refreshMonsterList();};
+window.onload=()=>{if(typeof initCustom==='function')initCustom();if(typeof initItems==='function')initItems();addRow('Goblin',3);addRow('Bugbear',1);gen();rollT();renderXP();if(typeof refreshMonsterList==='function')refreshMonsterList();};
 
 function addRow(name='',q=1){const d=document.createElement('div');d.className='brow';d.innerHTML=`<input class="bn" list="lkl" placeholder="Monster name, e.g. Goblin" value="${escAttr(name)}"><input class="bq" type="number" min="1" max="20" value="${q}"><button class="sm" onclick="this.parentNode.remove()" title="Remove">✖</button>`;$('brows').appendChild(d);}
 function buildEnc(){const rows=[...document.querySelectorAll('.brow')],mons=[],bad=[];
