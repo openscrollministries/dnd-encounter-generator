@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quick Encounter Generator (5e)</title>
+<style>
+body{margin:0;font-family:Georgia,serif;background:#1d1611 radial-gradient(circle at top,#3b2a1c,#120d09);color:#2b1d10}
+header{text-align:center;color:#f3d48a;padding:18px 10px 6px;text-shadow:0 2px 4px #000}header h1{margin:0;font-size:1.8em;letter-spacing:1px}header p{margin:4px;color:#d9c08a;font-style:italic}
+.wrap{max-width:900px;margin:auto;padding:10px}
+.card,.sb,.form{background:#f5e9cc linear-gradient(#f8eed6,#ecdcb5);border:2px solid #8a5a2b;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 4px 12px #0008}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.form label{font-weight:bold;font-size:.9em}
+select,input,textarea{width:100%;box-sizing:border-box;padding:8px;font-size:1em;border:1px solid #8a5a2b;border-radius:6px;background:#fffaf0;font-family:inherit}
+.ask{grid-column:1/-1;display:flex;gap:8px}.ask input{flex:1}
+button{background:#7a1f1f;color:#fbe7b5;border:1px solid #3b0d0d;border-radius:6px;padding:9px 14px;font-size:1em;font-family:inherit;cursor:pointer}button:hover{background:#9c2a2a}
+.btns{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
+.sb h3{color:#7a1f1f;margin:0;font-variant:small-caps;font-size:1.4em}.sbh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.sbh button{font-size:.8em;padding:5px 9px}
+.sb hr{border:0;border-top:2px solid #9c2a2a}.sb h4{color:#7a1f1f;border-bottom:1px solid #7a1f1f;margin:10px 0 4px;font-variant:small-caps;font-size:1.1em}.sb p{margin:4px 0}
+.ab{display:grid;grid-template-columns:repeat(6,1fr);text-align:center;font-size:.9em}
+.r{padding:2px 8px;border-radius:5px;color:#fff}.trivial{background:#777}.easy{background:#3d7a3d}.medium{background:#b08a18}.hard{background:#c25a14}.deadly{background:#8b1a1a}
+.warn{background:#ffe2b0;border-left:4px solid #c25a14;padding:6px}.hook{font-size:1.1em}.npc{margin:8px 0;padding-bottom:6px;border-bottom:1px dashed #8a5a2b}
+footer a{color:#d9c08a}footer{color:#a89060;text-align:center;font-size:.75em;padding:12px}
+@media print{body{background:#fff}.noprint,.form,header p{display:none}header h1{color:#000;text-shadow:none}.card,.sb{box-shadow:none;break-inside:avoid}}
+.mi{padding-left:18px}.mi li{margin:6px 0}.rar{font-size:.75em;padding:1px 6px;border-radius:4px;color:#fff;background:#3d7a3d}.rar.Common{background:#777}.rar.Rare{background:#2a5fa8}.rar.VeryRare{background:#7a2aa8}.rar.Legendary{background:#c27a14}
+button.sm{padding:2px 7px;font-size:.8em}.lvup{background:#c27a14;color:#fff;padding:1px 6px;border-radius:4px;font-weight:bold}.xpt{width:100%;border-collapse:collapse;margin-top:8px;font-size:.9em}.xpt td,.xpt th{border-bottom:1px solid #c9a86a;padding:4px;text-align:left}#xplist{padding-left:18px}
+.hb{font-size:.5em;vertical-align:middle;background:#2a6b5f;color:#fff;padding:2px 6px;border-radius:4px;font-variant:normal}
+.cm{font-size:.5em;vertical-align:middle;background:#6b3fa0;color:#fff;padding:2px 6px;border-radius:4px;font-variant:normal}
+.gn{font-size:.5em;vertical-align:middle;background:#8a5a2b;color:#fff;padding:2px 6px;border-radius:4px;font-variant:normal}
+.brow{display:flex;gap:6px;margin:6px 0}.brow .bn{flex:1}.brow .bq{width:70px}.cnt{background:#7a1f1f;color:#fbe7b5;border-radius:12px;padding:0 8px;font-size:.8em}
+.wide{grid-column:1/-1}.mod{color:#7a1f1f;font-weight:bold;font-size:.85em}
+.pair{display:flex;gap:6px;margin:4px 0;align-items:flex-start}.pair .pn{max-width:34%;flex:0 0 34%}.pair textarea{flex:1}
+.envs{display:flex;flex-wrap:wrap;gap:6px 14px}.envs label{font-weight:normal;font-size:.95em;display:flex;align-items:center;gap:4px}.envs input{width:auto}
+.mlist{list-style:none;padding:0;margin:8px 0}.mlist li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed #c9a86a;flex-wrap:wrap}
+.gennote{margin:4px 0 8px}.genblock{margin-top:8px}
+h3.sub{margin:16px 0 6px;color:#7a1f1f}
+#cmsec details{margin-top:8px}
+</style></head><body><header><h1>🐉 Quick Encounter Generator</h1><p>Monsters, traps &amp; NPCs for D&amp;D 5e — ready in one click</p></header>
+<div class="wrap"><div class="card noprint" id="bsec"><h2>🛠️ Build Your Own Encounter</h2><p><small>Pick exact monsters. Uses the party size &amp; level below.</small></p>
+<div id="brows"></div><div class="btns" style="margin-top:8px"><button onclick="addRow()">➕ Add another monster</button><button onclick="buildEnc()">⚔️ Build encounter</button></div><div id="bnote"></div></div>
+<div class="card noprint" id="cmsec"><h2>✨ Create Your Own Monster</h2>
+<p><small>Describe a monster, generate a handful, or fill in the stat block yourself. Everything runs in this page, with no network. Saved monsters stay in this browser and show up in lookup, Build Your Own Encounter, and random fights when the type and setting match.</small></p>
+<h3 class="sub">Describe one</h3>
+<div class="ask"><input id="cmprompt" placeholder="Try: I need a monster suitable for level 5 characters. Make it have ranged attacks, tentacles, and partial invisibility." onkeydown="if(event.key=='Enter')generateFromPrompt()"><button type="button" onclick="generateFromPrompt()">Create</button></div>
+<p><small>Mention a party level and the numbers are balanced so those characters can actually fight it. A level 5 party lands around CR 2–5, depending on whether you asked for a minion, a normal foe, or a boss. Leave the level out and the party level below is used.</small></p>
+<h3 class="sub">Or make several</h3>
+<div class="form" style="box-shadow:none;padding:0;margin:0;background:none;border:0">
+<div><label>How many</label><input id="cmcount" type="number" min="1" max="12" value="4"></div>
+<div><label>Party level</label><select id="cmlevel"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option></select></div>
+<div><label>Setting</label><select id="cmenv"><option value="any">any</option><option value="dungeon">dungeon</option><option value="forest">forest</option><option value="castle">castle</option><option value="city">town</option><option value="swamp">swamp</option><option value="mountain">mountain</option><option value="coast">coast</option><option value="cave">cave</option><option value="ruins">ruins</option><option value="arctic">arctic</option><option value="desert">desert</option><option value="underdark">underdark</option><option value="grassland">grassland</option></select></div>
+<div class="btns"><button type="button" onclick="generateBulk()">Generate monsters</button></div>
+</div>
+<div id="cmresults"></div>
+<h3 class="sub">Or fill in the stat block</h3>
+<div class="form" id="cmform" style="box-shadow:none;padding:0;margin:0;background:none;border:0">
+<input id="cmid" type="hidden">
+<div class="wide"><label>Name</label><input id="cmname" placeholder="Velvet Tendril"></div>
+<div><label>Size</label><select id="cmsize"><option>Tiny</option><option>Small</option><option selected>Medium</option><option>Large</option><option>Huge</option><option>Gargantuan</option></select></div>
+<div><label>Type</label><select id="cmtype"><option>aberration</option><option selected>beast</option><option>celestial</option><option>construct</option><option>dragon</option><option>elemental</option><option>fey</option><option>fiend</option><option>giant</option><option>humanoid</option><option>monstrosity</option><option>ooze</option><option>plant</option><option>undead</option></select></div>
+<div><label>Alignment</label><select id="cmalign"><option selected>unaligned</option><option>any alignment</option><option>lawful good</option><option>neutral good</option><option>chaotic good</option><option>lawful neutral</option><option>neutral</option><option>chaotic neutral</option><option>lawful evil</option><option>neutral evil</option><option>chaotic evil</option></select></div>
+<div><label>Armor class</label><input id="cmac" type="number" min="1" max="30" value="12"></div>
+<div><label>Hit points</label><input id="cmhp" type="number" min="1" max="999" value="22"></div>
+<div><label>Hit dice</label><input id="cmhd" placeholder="4d8+4" value="4d8+4"></div>
+<div class="wide"><label>Speed</label><input id="cmsp" placeholder="walk 30 ft." value="walk 30 ft."></div>
+<div><label>STR <span class="mod" id="cmstrm"></span></label><input id="cmstr" type="number" min="1" max="30" value="14" oninput="showMods()"></div>
+<div><label>DEX <span class="mod" id="cmdexm"></span></label><input id="cmdex" type="number" min="1" max="30" value="12" oninput="showMods()"></div>
+<div><label>CON <span class="mod" id="cmconm"></span></label><input id="cmcon" type="number" min="1" max="30" value="13" oninput="showMods()"></div>
+<div><label>INT <span class="mod" id="cmintm"></span></label><input id="cmint" type="number" min="1" max="30" value="8" oninput="showMods()"></div>
+<div><label>WIS <span class="mod" id="cmwism"></span></label><input id="cmwis" type="number" min="1" max="30" value="10" oninput="showMods()"></div>
+<div><label>CHA <span class="mod" id="cmcham"></span></label><input id="cmcha" type="number" min="1" max="30" value="8" oninput="showMods()"></div>
+<div><label>Challenge rating</label><select id="cmcr" onchange="showMods()"><option value="0">0</option><option value="0.125">1/8</option><option value="0.25">1/4</option><option value="0.5">1/2</option><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option></select><div class="mod" id="cmxp"></div></div>
+<div class="wide"><label>Traits</label><div id="cmtraits"></div><button type="button" class="sm" onclick="addPair('cmtraits')">➕ Add trait</button></div>
+<div class="wide"><label>Actions</label><div id="cmactions"></div><button type="button" class="sm" onclick="addPair('cmactions')">➕ Add action</button></div>
+<div class="wide"><label>Reactions</label><div id="cmreactions"></div><button type="button" class="sm" onclick="addPair('cmreactions')">➕ Add reaction</button></div>
+<div class="wide"><label>Legendary actions</label><div id="cmlegend"></div><button type="button" class="sm" onclick="addPair('cmlegend')">➕ Add legendary action</button></div>
+<div class="wide"><label>Settings</label><div class="envs" id="cmenvs"><label><input type="checkbox" value="dungeon">dungeon</label><label><input type="checkbox" value="forest">forest</label><label><input type="checkbox" value="swamp">swamp</label><label><input type="checkbox" value="mountain">mountain</label><label><input type="checkbox" value="desert">desert</label><label><input type="checkbox" value="cave">cave</label><label><input type="checkbox" value="city">city</label><label><input type="checkbox" value="castle">castle</label><label><input type="checkbox" value="coast">coast</label><label><input type="checkbox" value="underdark">underdark</label><label><input type="checkbox" value="arctic">arctic</label><label><input type="checkbox" value="grassland">grassland</label><label><input type="checkbox" value="ruins">ruins</label></div><small>Checked settings are where a random encounter can pick this monster.</small></div>
+<details class="wide"><summary>More details (optional)</summary>
+<div class="form" style="box-shadow:none;padding:8px 0 0;margin:0;background:none;border:0">
+<div><label>Armor note</label><input id="cmact" placeholder="natural armor"></div>
+<div><label>Saving throws</label><input id="cmsv" placeholder="CON +4, WIS +2"></div>
+<div><label>Skills</label><input id="cmsk" placeholder="Stealth +5"></div>
+<div><label>Senses</label><input id="cmse" placeholder="darkvision 60 ft., passive perception 12"></div>
+<div><label>Languages</label><input id="cmla" placeholder="Common"></div>
+<div class="wide"><label>Resistances</label><input id="cmres" placeholder="Resist: cold; Immune: poison"></div>
+</div></details>
+<div class="btns"><button type="button" id="cmsave" onclick="saveCustomForm()">Save monster</button><button type="button" onclick="resetCustomForm()">Clear</button></div>
+</div>
+<h3 class="sub">Saved monsters</h3>
+<ul id="cmlist" class="mlist"></ul>
+<div class="btns"><button type="button" onclick="exportCustom()">Export JSON</button><button type="button" onclick="$('cmfile').click()">Import JSON</button><input id="cmfile" type="file" accept="application/json,.json" hidden onchange="importCustomFile(this)"></div>
+<p id="cmmsg"></p>
+</div>
+<div id="bout"></div>
+<div class="form noprint">
+<div class="ask"><input id="ask" placeholder='Try: "4 monsters for 5 third level characters in a swamp"' onkeydown="if(event.key=='Enter')ask()"><button onclick="ask()">Ask</button></div>
+<div><label>Players (PCs)</label><select id="pcs"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+<div><label>Party level</label><select id="lvl"><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option></select></div>
+<div><label>Monsters</label><select id="cnt"><option value="auto">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></div>
+<div><label>Setting</label><select id="env"><option>any</option><option selected>dungeon</option><option>forest</option><option>swamp</option><option>mountain</option><option>desert</option><option>cave</option><option>city</option><option>castle</option><option>coast</option><option>underdark</option><option>arctic</option><option>grassland</option><option>ruins</option></select></div>
+<div><label>Monster type</label><select id="type"><option selected>any</option><option>dragon</option><option>fiend</option><option>undead</option><option>beast</option><option>giant</option><option>aberration</option><option>humanoid</option><option>monstrosity</option><option>construct</option><option>elemental</option><option>fey</option><option>celestial</option><option>ooze</option><option>plant</option></select></div>
+<div><label>Monster source</label><select id="src" onchange="setSrc(this.value)"><option value="all">SRD + Homebrew</option><option value="srd">SRD only</option><option value="hb">Homebrew only</option><option value="mine">My monsters only</option></select></div>
+<div><label>Difficulty</label><select id="diff"><option>easy</option><option selected>medium</option><option>hard</option><option>deadly</option></select></div>
+<div class="btns"><button onclick="gen()">🎲 Generate / Reroll</button><button onclick="print()">🖨️ Print</button><button onclick="copyOut()">📋 Copy</button><label style="align-self:center"><input type="checkbox" id="tre" checked style="width:auto" onchange="render()"> Treasure</label><select id="tmode" style="width:auto" onchange="rerollEncT()"><option value="ind">Individual</option><option value="hoard">Hoard</option></select></div>
+</div><div id="out"></div>
+<div class="card" id="lksec"><h2>🔎 Monster Lookup</h2><input id="lk" list="lkl" placeholder="Type a monster name, e.g. Owlbear" oninput="lookup()"><datalist id="lkl"></datalist><div id="lkout"></div></div>
+<div class="card" id="xpsec"><h2>🏆 XP Tracker</h2>
+<div class="form" style="box-shadow:none;margin:0;padding:8px"><div><label>Party members</label><input id="xpm" type="number" min="1" onchange="XP.members=Math.max(1,+this.value);saveXP()"></div>
+<div class="ask"><input id="xpadd" list="lkl" placeholder="Add a monster by name, or a raw XP number" onkeydown="if(event.key=='Enter')addManual()"><button onclick="addManual()">Add</button></div></div>
+<ul id="xplist"></ul><p id="xptot" style="font-size:1.15em"></p>
+<div class="btns"><button onclick="XP.entries.pop();saveXP()">↩ Undo last</button><button onclick="if(confirm('Reset all XP?')){XP={members:null,entries:[],chars:XP.chars};saveXP()}">🔄 Reset XP</button></div>
+<h3>Characters (optional)</h3><div class="ask"><input id="xpcn" placeholder="Character name"><input id="xpcs" type="number" placeholder="Current XP" style="max-width:130px"><button onclick="addChar()">Add</button></div>
+<table class="xpt"><thead><tr><th>Name</th><th>Start</th><th>Now</th><th>Level</th><th>Next</th><th></th></tr></thead><tbody id="xpchars"></tbody></table></div>
+<div class="card" id="tsec"><h2>💰 Roll Treasure</h2><div class="form noprint" style="box-shadow:none;margin:0;padding:8px">
+<div><label>Type</label><select id="tkind" onchange="rollT()"><option value="ind">Individual</option><option value="hoard" selected>Hoard</option></select></div>
+<div><label>CR / level band</label><select id="tband" onchange="rollT()"><option value="0">CR 0–4 (levels 1–4)</option><option value="1">CR 5–10 (levels 5–10)</option><option value="2">CR 11–16 (levels 11–16)</option><option value="3">CR 17+ (levels 17–20)</option></select></div>
+<div class="btns"><button onclick="rollT()">🎲 Roll / Reroll</button><button onclick="copyT()">📋 Copy</button></div></div><div id="tout"></div></div></div>
+<footer>This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at <a href="https://dnd.wizards.com/resources/systems-reference-document">https://dnd.wizards.com/resources/systems-reference-document</a>. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at <a href="https://creativecommons.org/licenses/by/4.0/legalcode">https://creativecommons.org/licenses/by/4.0/legalcode</a>.<br>Monster data via <a href="https://github.com/5e-bits/5e-database">5e-bits/5e-database</a> (MIT). Monsters marked "Homebrew (original)" are original creations for this tool. Monsters marked "My monster" are ones you saved in this browser. Unofficial fan tool, not affiliated with or endorsed by Wizards of the Coast.</footer>
+<!-- APP_SCRIPT -->
+</body></html>
